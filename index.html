@@ -1,24 +1,13 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>Health Registry Test</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 30px;
-      max-width: 600px;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 8px 16px;
-    }
+    body { font-family: sans-serif; margin: 30px; max-width: 600px; }
+    label { display:block; margin-top:10px; }
+    button { margin-top:20px; padding:8px 16px; }
+    #output { margin-top:20px; font-weight:bold; }
   </style>
 </head>
 
@@ -52,42 +41,55 @@
   <div id="output"></div>
 
   <script>
-    // --- Toggle smoke details dynamically ---
+    // --- Show / hide smoking details ---
     const smokeRadios = document.querySelectorAll('input[name="smoke"]');
     smokeRadios.forEach(r => r.addEventListener('change', () => {
       document.getElementById('smokeDetails').style.display =
         (r.value === 'Yes' && r.checked) ? 'block' : 'none';
     }));
 
-    // --- Form submission and Google Sheets saving ---
+    // --- Handle form submission ---
     const form = document.getElementById('dataForm');
     form.addEventListener('submit', e => {
       e.preventDefault();
 
-      // Convert form fields to an object
       const data = Object.fromEntries(new FormData(form));
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbybc-lagk4ROE-ts9HGxj2mA7z_u7LdLIbgYL9pTny6ZBWO4DPABM2RuEp5bfklcvE/exec';
 
-      // ✅ Send to Google Sheets via Apps Script web app
-      fetch('https://script.google.com/macros/s/AKfycbx4l-DJ_qD15UqogyF9JzPcEi_H-Xz1Pa1pgL3RrFYClFqaNkvGIRbVwihyuUw3tYsD/exec', {
+      fetch(scriptURL, {
         method: 'POST',
         body: JSON.stringify(data)
       })
-        .then(r => r.json())
-        .then(res => {
+      .then(async r => {
+        try {
+          const res = await r.json();
           if (res.status === 'success') {
-            alert('✅ ' + res.message);
             document.getElementById('output').innerText = '✅ Submission sent successfully!';
+            alert('✅ ' + res.message);
+            form.reset();
+            document.getElementById('smokeDetails').style.display = 'none';
           } else {
-            alert('❌ Error: ' + res.message);
             document.getElementById('output').innerText = '❌ Submission failed!';
+            alert('❌ Error: ' + res.message);
           }
-        })
-        .catch(err => {
-          alert('🚨 Network error: ' + err);
-          document.getElementById('output').innerText = '🚨 Network error: ' + err;
-        });
-  });
+        } catch (e) {
+          // fallback for plain-text response
+          const text = await r.text();
+          if (text.includes('OK')) {
+            document.getElementById('output').innerText = '✅ Submission sent successfully!';
+            alert('✅ Saved OK (plain text)');
+            form.reset();
+            document.getElementById('smokeDetails').style.display = 'none';
+          } else {
+            throw e;
+          }
+        }
+      })
+      .catch(err => {
+        document.getElementById('output').innerText = '🚨 Network error: ' + err;
+        alert('🚨 Network error: ' + err);
+      });
+    });
   </script>
 </body>
-
 </html>
