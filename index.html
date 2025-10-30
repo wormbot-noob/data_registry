@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Health Registry Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 30px;
+      max-width: 600px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 8px 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Patient Demographics</h2>
+
+  <form id="dataForm">
+    <label>Patient ID 1: <input type="text" name="id1" required></label>
+    <label>Patient ID 2: <input type="text" name="id2" required></label>
+
+    <label>Gender:
+      <select name="gender">
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+    </label>
+
+    <label>Smoker?
+      <input type="radio" name="smoke" value="Yes"> Yes
+      <input type="radio" name="smoke" value="No"> No
+    </label>
+
+    <div id="smokeDetails" style="display:none;">
+      <label>Type of smoking: <input name="smoke_type"></label>
+      <label>Years smoked: <input name="smoke_years" type="number"></label>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="output"></div>
+
+  <script>
+    // --- Toggle smoke details dynamically ---
+    const smokeRadios = document.querySelectorAll('input[name="smoke"]');
+    smokeRadios.forEach(r => r.addEventListener('change', () => {
+      document.getElementById('smokeDetails').style.display =
+        (r.value === 'Yes' && r.checked) ? 'block' : 'none';
+    }));
+
+    // --- Form submission and Google Sheets saving ---
+    const form = document.getElementById('dataForm');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      // Convert form fields to an object
+      const data = Object.fromEntries(new FormData(form));
+
+      // ✅ Send to Google Sheets via Apps Script web app
+      fetch('https://script.google.com/macros/s/AKfycbx4l-DJ_qD15UqogyF9JzPcEi_H-Xz1Pa1pgL3RrFYClFqaNkvGIRbVwihyuUw3tYsD/exec', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.status === 'success') {
+            alert('✅ ' + res.message);
+            document.getElementById('output').innerText = '✅ Submission sent successfully!';
+          } else {
+            alert('❌ Error: ' + res.message);
+            document.getElementById('output').innerText = '❌ Submission failed!';
+          }
+        })
+        .catch(err => {
+          alert('🚨 Network error: ' + err);
+          document.getElementById('output').innerText = '🚨 Network error: ' + err;
+        });
+  });
+  </script>
+</body>
+
+</html>
