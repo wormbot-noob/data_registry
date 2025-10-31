@@ -50,45 +50,34 @@
 
     // --- Handle form submission ---
     const form = document.getElementById('dataForm');
-    form.addEventListener('submit', e => {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzHeU3lDyJZxtXB1OV83nR0YocIGMTMxC5IdmyOuQoYGqt6Q4TXbGo-fu8uVZMDD928/exec';
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const data = Object.fromEntries(new FormData(form));
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbzHeU3lDyJZxtXB1OV83nR0YocIGMTMxC5IdmyOuQoYGqt6Q4TXbGo-fu8uVZMDD928/exec';
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
-      .then(async r => {
-        try {
-          const res = await r.json();
-          if (res.status === 'success') {
-            document.getElementById('output').innerText = '✅ Submission sent successfully!';
-            alert('✅ ' + res.message);
-            form.reset();
-            document.getElementById('smokeDetails').style.display = 'none';
-          } else {
-            document.getElementById('output').innerText = '❌ Submission failed!';
-            alert('❌ Error: ' + res.message);
-          }
-        } catch (e) {
-          // fallback for plain-text response
-          const text = await r.text();
-          if (text.includes('OK')) {
-            document.getElementById('output').innerText = '✅ Submission sent successfully!';
-            alert('✅ Saved OK (plain text)');
-            form.reset();
-            document.getElementById('smokeDetails').style.display = 'none';
-          } else {
-            throw e;
-          }
+      try {
+        const response = await fetch(scriptURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          body: JSON.stringify(data)
+        });
+
+        const res = await response.json();
+
+        if (res.status === 'success') {
+          document.getElementById('output').innerText = '✅ Submission sent successfully!';
+          alert('✅ ' + res.message);
+          form.reset();
+          document.getElementById('smokeDetails').style.display = 'none';
+        } else {
+          throw new Error(res.message || 'Unknown error');
         }
-      })
-      .catch(err => {
+      } catch (err) {
         document.getElementById('output').innerText = '🚨 Network error: ' + err;
-        alert('🚨 Network error: ' + err);
-      });
+        console.error(err);
+      }
     });
   </script>
 </body>
