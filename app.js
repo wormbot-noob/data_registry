@@ -374,6 +374,30 @@ async testBackendConnection() {
     }
 }
 
+// Add this method to your class
+async testBackendDirectly() {
+    const testData = {
+        patientId: 'TEST_' + Date.now(),
+        age: '30',
+        gender: 'male',
+        smokingStatus: 'non-smoker',
+        submittedAt: new Date().toISOString()
+    };
+
+    try {
+        const result = await this.sendToGoogleSheets(testData);
+        console.log('Direct test result:', result);
+        alert('Backend test: SUCCESS!');
+        return true;
+    } catch (error) {
+        console.error('Direct test failed:', error);
+        alert('Backend test: FAILED - ' + error.message);
+        return false;
+    }
+}
+
+// Call this in your init method temporarily:
+// this.testBackendDirectly();
 // Add this to your init method to test connection on startup if needed
 // this.testBackendConnection();
 // Backup method to store data locally if backend is unavailable
