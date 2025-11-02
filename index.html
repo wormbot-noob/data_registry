@@ -1,84 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Health Registry Test</title>
-  <style>
-    body { font-family: sans-serif; margin: 30px; max-width: 600px; }
-    label { display:block; margin-top:10px; }
-    button { margin-top:20px; padding:8px 16px; }
-    #output { margin-top:20px; font-weight:bold; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Assessment App</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <h2>Patient Demographics</h2>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Medical Assessment</h1>
+            <div class="progress-indicator">
+                <span class="step active">1</span>
+                <span class="step">2</span>
+                <span class="step">3</span>
+            </div>
+        </header>
 
-  <form id="dataForm">
-    <label>Patient ID 1: <input type="text" name="id1" required></label>
-    <label>Patient ID 2: <input type="text" name="id2" required></label>
+        <main class="main-content">
+            <!-- Modules will be dynamically loaded here -->
+            <div id="module-container">
+                <!-- Patient Demographics, Smoking Status, Medical Conditions will load here -->
+            </div>
+        </main>
 
-    <label>Gender:
-      <select name="gender">
-        <option>Male</option>
-        <option>Female</option>
-      </select>
-    </label>
-
-    <label>Smoker?
-      <input type="radio" name="smoke" value="Yes"> Yes
-      <input type="radio" name="smoke" value="No"> No
-    </label>
-
-    <div id="smokeDetails" style="display:none;">
-      <label>Type of smoking: <input name="smoke_type"></label>
-      <label>Years smoked: <input name="smoke_years" type="number"></label>
+        <footer class="app-footer">
+            <button id="prev-btn" class="btn btn-secondary" disabled>Previous</button>
+            <button id="next-btn" class="btn btn-primary">Next</button>
+            <button id="submit-btn" class="btn btn-success" style="display: none;">Submit</button>
+        </footer>
     </div>
 
-    <button type="submit">Submit</button>
-  </form>
-
-  <div id="output"></div>
-
-  <script>
-    // --- Show / hide smoking details ---
-    const smokeRadios = document.querySelectorAll('input[name="smoke"]');
-    smokeRadios.forEach(r => r.addEventListener('change', () => {
-      document.getElementById('smokeDetails').style.display =
-        (r.value === 'Yes' && r.checked) ? 'block' : 'none';
-    }));
-
-    // --- Handle form submission ---
-    const form = document.getElementById('dataForm');
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxz5BqiLmZxgoKNVr7atTdotc9JeLAXGVBYGlZ46x6jSmrqO5cp3jsTbBSe2SnjaQA/exec';
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form));
-
-      try {
-        const response = await fetch(scriptURL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          mode: 'cors',
-          body: JSON.stringify(data)
-        });
-
-        const res = await response.json();
-
-        if (res.status === 'success') {
-          document.getElementById('output').innerText = '✅ Submission sent successfully!';
-          alert('✅ ' + res.message);
-          form.reset();
-          document.getElementById('smokeDetails').style.display = 'none';
-        } else {
-          throw new Error(res.message || 'Unknown error');
-        }
-      } catch (err) {
-        document.getElementById('output').innerText = '🚨 Network error: ' + err;
-        console.error(err);
-      }
-    });
-  </script>
+    <script src="app.js"></script>
 </body>
 </html>
