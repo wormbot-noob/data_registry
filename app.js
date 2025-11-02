@@ -350,7 +350,7 @@ class MedicalAssessmentApp {
 }
 // Test the backend connection
 async testBackendConnection() {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwzlXiUAgwvsTve5Ty_BYIf_oKXSy_VWRHwTmn_VUrFfiiFew0br9pDan7AOL2Nksh7/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyV762TS9OGZ3T4AM03YrQAtp2TmBEmrQhkpLmUCNznpkKaLIfkRu0sEL_qW-qq9Xdk/exec';
     
     try {
         const response = await fetch(scriptURL + '?action=test');
