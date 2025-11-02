@@ -351,7 +351,25 @@ class MedicalAssessmentApp {
         throw new Error(`Failed to submit data: ${error.message}`);
     }
 }
+// Test the backend connection
+async testBackendConnection() {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwzlXiUAgwvsTve5Ty_BYIf_oKXSy_VWRHwTmn_VUrFfiiFew0br9pDan7AOL2Nksh7/exec';
+    
+    try {
+        const response = await fetch(scriptURL + '?action=test');
+        const result = await response.json();
+        console.log('Backend test result:', result);
+        alert('Backend connection successful!');
+        return true;
+    } catch (error) {
+        console.error('Backend test failed:', error);
+        alert('Backend connection failed. Check console for details.');
+        return false;
+    }
+}
 
+// Add this to your init method to test connection on startup if needed
+// this.testBackendConnection();
 // Backup method to store data locally if backend is unavailable
 storeLocalBackup(data) {
     try {
