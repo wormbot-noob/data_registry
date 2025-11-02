@@ -314,9 +314,9 @@ class MedicalAssessmentApp {
         return 'PAT' + Date.now() + Math.random().toString(36).substr(2, 5);
     }
 
-    async sendToGoogleSheets(data) {
-    // Replace with your actual Google Apps Script Web App URL
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwzlXiUAgwvsTve5Ty_BYIf_oKXSy_VWRHwTmn_VUrFfiiFew0br9pDan7AOL2Nksh7/exec';
+   async sendToGoogleSheets(data) {
+    // 🔥 REPLACE THIS WITH YOUR ACTUAL APPS SCRIPT URL
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyV762TS9OGZ3T4AM03YrQAtp2TmBEmrQhkpLmUCNznpkKaLIfkRu0sEL_qW-qq9Xdk/exec';
     
     try {
         console.log('Sending data to backend:', data);
@@ -344,10 +344,7 @@ class MedicalAssessmentApp {
         
     } catch (error) {
         console.error('Error sending to Google Sheets:', error);
-        
-        // Fallback: Store in browser localStorage if backend fails
         this.storeLocalBackup(data);
-        
         throw new Error(`Failed to submit data: ${error.message}`);
     }
 }
