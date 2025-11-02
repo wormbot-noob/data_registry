@@ -315,15 +315,85 @@ class MedicalAssessmentApp {
     }
 
     async sendToGoogleSheets(data) {
-        // This will connect to Google Apps Script web app
-        // We'll implement this in Phase 2
-        console.log('Sending to Google Sheets:', data);
+    // Replace with your actual Google Apps Script Web App URL
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwzlXiUAgwvsTve5Ty_BYIf_oKXSy_VWRHwTmn_VUrFfiiFew0br9pDan7AOL2Nksh7/exec';
+    
+    try {
+        console.log('Sending data to backend:', data);
         
-        // Mock implementation for now
-        return new Promise((resolve) => {
-            setTimeout(resolve, 1000);
+        const response = await fetch(scriptURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('Backend response:', result);
+        
+        if (result.success) {
+            return result;
+        } else {
+            throw new Error(result.error || 'Unknown error from backend');
+        }
+        
+    } catch (error) {
+        console.error('Error sending to Google Sheets:', error);
+        
+        // Fallback: Store in browser localStorage if backend fails
+        this.storeLocalBackup(data);
+        
+        throw new Error(`Failed to submit data: ${error.message}`);
     }
+}
+
+// Backup method to store data locally if backend is unavailable
+storeLocalBackup(data) {
+    try {
+        const backups = JSON.parse(localStorage.getItem('patientDataBackups') || '[]');
+        backups.push({
+            ...data,
+            backupTimestamp: new Date().toISOString()
+        });
+        localStorage.setItem('patientDataBackups', JSON.stringify(backups));
+        console.log('Data backed up locally. Total backups:', backups.length);
+    } catch (error) {
+        console.error('Failed to backup locally:', error);
+    }
+}
+
+// Method to retry failed submissions
+async retryFailedSubmissions() {
+    try {
+        const backups = JSON.parse(localStorage.getItem('patientDataBackups') || '[]');
+        const successfulRetries = [];
+        
+        for (const backup of backups) {
+            try {
+                await this.sendToGoogleSheets(backup);
+                successfulRetries.push(backup);
+            } catch (error) {
+                console.error('Failed to retry backup:', error);
+            }
+        }
+        
+        // Remove successfully retried backups
+        const remainingBackups = backups.filter(backup => 
+            !successfulRetries.includes(backup)
+        );
+        localStorage.setItem('patientDataBackups', JSON.stringify(remainingBackups));
+        
+        console.log(`Retried ${successfulRetries.length} backups. ${remainingBackups.length} remaining.`);
+        
+    } catch (error) {
+        console.error('Error retrying submissions:', error);
+    }
+}
 
     resetApp() {
         this.currentModule = 0;
