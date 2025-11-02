@@ -292,23 +292,32 @@ class MedicalAssessmentApp {
     }
 
     async submitData() {
-        if (this.validateCurrentModule()) {
-            this.saveModuleData();
-            
-            // Add patient ID and timestamp
-            this.patientData.patientId = this.generatePatientId();
-            this.patientData.submittedAt = new Date().toISOString();
-            
-            try {
-                await this.sendToGoogleSheets(this.patientData);
-                alert('Data submitted successfully!');
-                this.resetApp();
-            } catch (error) {
-                alert('Error submitting data. Please try again.');
-                console.error('Submission error:', error);
-            }
+    if (this.validateCurrentModule()) {
+        this.saveModuleData();
+        
+        // Add patient ID and timestamp
+        this.patientData.patientId = this.generatePatientId();
+        this.patientData.submittedAt = new Date().toISOString();
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        
+        try {
+            await this.sendToGoogleSheets(this.patientData);
+            alert('✅ Data submitted successfully!');
+            this.resetApp();
+        } catch (error) {
+            console.error('Full error details:', error);
+            alert('❌ Error submitting data: ' + error.message);
+        } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
         }
     }
+}
 
     generatePatientId() {
         return 'PAT' + Date.now() + Math.random().toString(36).substr(2, 5);
